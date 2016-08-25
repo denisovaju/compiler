@@ -3,19 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-//анализатор
 namespace ConsoleApplication1
 {
-    //в классе проверяется соответствует ли введенное выражение заданному алфавиту, также отлавливаются ошибочные - символы
-    //нужно сделать, чтобы алфавит задавался в классе - наследнике
-
     class LexicalAnalysis
     {
         public const string INTEGER = "INTEGER";
         public const string PLUS = "PLUS";
+        public const string MINUS = "MINUS";
 
         private string characters;
-        private string lexema = "0123456789+";
+        private string lexema = "0123456789+-";
 
         public List<char> error = new List<char> ();       
 
@@ -62,18 +59,10 @@ namespace ConsoleApplication1
         }
     }
 
-    //класс - наследник, в нем выполняются специфические функции узкого анализа информации
-    //написать конструктор
     class ArithmeticAnalysis : LexicalAnalysis
     {
         private List<string> token = new List<string>();
 
-        //демонстрация
-        public void demo(string s)
-        {
-               List<string> m = get_token(s);
-               show(m);
-        }
         //возвращает токены, только для однозначных чисел, порядок следования числа и оператора не учитывается
         public List<string> get_token(string s)
         {
@@ -81,15 +70,23 @@ namespace ConsoleApplication1
             int counter = 0;
             for (int i = 0; i < s.Length; i++)
             {
-                if (s[i] == '+')
+                if (s[i] == '+' || s[i] == '-')
                 { 
                     counter += 1;
                     if (counter == 1)
                     {
-                        //temp = "operator" + " : " + s[i];
-                        temp[0] = PLUS;
-                        temp[1] = s[i] + "#";
-                        token.AddRange(temp);
+                        if (s[i] == '+')
+                        {
+                            temp[0] = PLUS;
+                            temp[1] = s[i] + "#";
+                            token.AddRange(temp);                           
+                        }
+                        else if (s[i] == '-')
+                        {
+                            temp[0] = MINUS;
+                            temp[1] = s[i] + "#";
+                            token.AddRange(temp);  
+                        }
                         continue;
                     }
                     else
@@ -104,24 +101,34 @@ namespace ConsoleApplication1
                 for (int j = 0; j < s.Length; j++)
                 {
                     //проверка для однозначного числа
-                    while (s[j] != '+')
+                    while (true)
                     {
-                        if (counter == 1)
+                        if(s[j] == '+')
                         {
-
-                            temp[0] = INTEGER;
-                            temp[1] = s[j] + "#";
-                            token.AddRange(temp);
-                            counter += 1;
                             break;
                         }
-                        else if (counter == 2)
+                        else if (s[j] == '-')
                         {
-                            temp[0] = INTEGER;
-                            temp[1] = s[j] + "#";
-                            token.AddRange(temp);
-                            counter += 1;
                             break;
+                        }
+                        else
+                        {
+                            if (counter == 1)
+                            {
+                                temp[0] = INTEGER;
+                                temp[1] = s[j] + "#";
+                                token.AddRange(temp);
+                                counter += 1;
+                                break;
+                            }
+                            else if (counter == 2)
+                            {
+                                temp[0] = INTEGER;
+                                temp[1] = s[j] + "#";
+                                token.AddRange(temp);
+                                counter += 1;
+                                break;
+                            }
                         }
                     }
                 }
@@ -132,15 +139,6 @@ namespace ConsoleApplication1
                 token.Clear();
                 token.Add("No correct input");
                 return token;
-            }
-        }
-
-        //просто выводит список с токенами
-        public void show(List<string> l)
-        {
-            for (int i = 0; i < l.Count; i++)
-            {
-                Console.WriteLine(l[i]);
             }
         }
     }
@@ -157,7 +155,6 @@ namespace ConsoleApplication1
 
             for (int i = 0; i < l.Count; i++)
             {
-                //Console.WriteLine(l[i]);
                 if (i % 2 != 0)
                 {
                     for (int j = 0; j < l.Count; j++)
@@ -186,12 +183,16 @@ namespace ConsoleApplication1
                     }
                 }
             }
-
             if (operation == "+")
             {
-                int summa = a + b;
-                Console.WriteLine(summa);
-            }            
+                int result = a + b;
+                Console.WriteLine(result);
+            }
+            else if (operation == "-")
+            {
+                int result = a - b;
+                Console.WriteLine(result);
+            }
         }
     }
 
@@ -204,12 +205,8 @@ namespace ConsoleApplication1
                 LexicalAnalysis lexema = new LexicalAnalysis();
                 Console.WriteLine("Enter your expression: " + lexema.Lexema);
                 lexema.Characters = Console.ReadLine();
-                //lexema.setCharacters(s);
-
 
                 ArithmeticAnalysis number = new ArithmeticAnalysis();
-                //number.demo(lexema.Characters);
-
                 List<string> token = new List<string>();
                 token = number.get_token(lexema.Characters);
 
