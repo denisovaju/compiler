@@ -7,17 +7,26 @@ namespace ConsoleApplication1
 {
     class LexicalAnalysis
     {
-        protected const string INTEGER = "INTEGER";
-        protected const string PLUS = "PLUS";
-        protected const string MINUS = "MINUS";
+        private string value1, value2, operation;
 
-        protected const string ADD = "+";
-        protected const string SUBTRACTION = "-";
+        internal const string INTEGER = "INTEGER";
+        internal const string PLUS = "PLUS";
+        internal const string MINUS = "MINUS";
 
-        protected List<string> token = new List<string>();
+        internal const string ADD = "+";
+        internal const string SUBTRACTION = "-";
+
+        public LexicalAnalysis()
+        {
+            value1 = null;
+            value2 = null;
+            operation = null;
+        }
+
+        public Dictionary<string, string> token = new Dictionary<string, string>();
 
         private string characters;
-        private string lexema = "0123456789+-add";
+        private string lexema = "0123456789+-";
 
         public List<char> error = new List<char>();
 
@@ -49,7 +58,7 @@ namespace ConsoleApplication1
                 if (error.Count == 0)
                 {
                     characters = value;
-                    Console.WriteLine("O-la-la");
+                    //Console.WriteLine("O-la-la");
                 }
                 else
                 {
@@ -62,11 +71,6 @@ namespace ConsoleApplication1
                 }
             }
         }
-
-        public Dictionary<string, string> tokena = new Dictionary<string, string>();
-
-        public string value1 = "0";
-        public string value2 = "0";
         
         public Dictionary<string, string> get_next_token(string s)
         {
@@ -114,33 +118,37 @@ namespace ConsoleApplication1
             {
                 if (((!s.StartsWith(ADD)) && (!s.EndsWith(ADD))) && ((!s.StartsWith(SUBTRACTION)) && (!s.EndsWith(SUBTRACTION))))
                 {
-                    Console.WriteLine("True");
                     value1 = s.Substring(0, index);
+                    value2 = s.Remove(0, index + 1);
+                    operation = s.Substring(index, 1);
 
-                    //Console.WriteLine(value);
-                    tokena.Add(value1, INTEGER);
+                    token.Add(value1, INTEGER);
+                    token.Add(value2, INTEGER);
 
-                    //index++;
-                    value2 = s.Remove(0, index + 1); ;
-                    tokena.Add(value2, INTEGER);
-                    //ICollection<string> keys = tokena.Keys;
-                    return tokena;
+                    if (counter == 1)
+                    {
+                        token.Add(operation, PLUS);
+                    }
+                    else if (c == 1)
+                    {
+                        token.Add(operation, MINUS);
+                    }
+                    return token;
                 }
                 else
                 {
                     Console.WriteLine("Sorry, but you don't write '+' or '-' at the start or end");
-                    return tokena;
+                    return token;
                 }
             }
-
             else
             {
                 Console.WriteLine("Sorry, but you don't write '+' or '-' more one ");
-                return tokena;
+                return token;
             }
         }
 
-        public void show(Dictionary<string, string> dic)
+        /*public void show(Dictionary<string, string> dic)
         {
             ICollection<string> keys = dic.Keys;
             foreach (string j in keys)
@@ -148,6 +156,65 @@ namespace ConsoleApplication1
                 Console.WriteLine(j);
                 Console.WriteLine(dic[j]);
             }
+        }*/
+    }
+
+    class Parser : LexicalAnalysis
+    {
+        int a, b, result;
+
+        public Parser()
+        {
+            a = 0;
+            b = 0;
+            result = 0;
+        }
+
+        public int number(Dictionary<string, string> dic)
+        {
+            int counter = 0;
+            ICollection<string> keys = dic.Keys;
+            foreach (string j in keys)
+            {
+                if (dic[j] == INTEGER)
+                {
+                    if (counter == 0)
+                    {
+                        a = Convert.ToInt32(j);
+                        counter++;
+                    }
+                    else if (counter == 1)
+                    {
+                        b = Convert.ToInt32(j);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            foreach (string j in keys)
+            {
+                if (dic[j] == PLUS)
+                {
+                    result = a + b;
+                    break;
+                }
+                else if (dic[j] == MINUS)
+                {
+                    result = a - b;
+                    break;
+                }
+                else
+                {
+                    continue;
+                }
+           }
+            return result;
         }
     }
 
@@ -157,15 +224,18 @@ namespace ConsoleApplication1
         {
             while (true)
             {
-                LexicalAnalysis p = new LexicalAnalysis();
-                Console.WriteLine("Enter your expression: " + p.Lexema);
-                p.Characters = Console.ReadLine();
+                LexicalAnalysis lexema = new LexicalAnalysis();
+                Console.WriteLine("Enter your expression: " + lexema.Lexema);
+                lexema.Characters = Console.ReadLine();
 
                 Dictionary<string, string> tokena = new Dictionary<string, string>();
 
-                tokena = p.get_next_token(p.Characters);
-                p.show(tokena);
+                tokena = lexema.get_next_token(lexema.Characters);
+                //lexema.show(tokena);
 
+                Parser p = new Parser();
+                int x = p.number(tokena);
+                Console.WriteLine(x);
                 //Console.ReadKey();
             }
         }
