@@ -7,11 +7,14 @@ namespace ConsoleApplication1
 {
     class LexicalAnalysis
     {
-        public const string INTEGER = "INTEGER";
-        public const string PLUS = "PLUS";
-        public const string MINUS = "MINUS";
+        protected const string INTEGER = "INTEGER";
+        protected const string PLUS = "PLUS";
+        protected const string MINUS = "MINUS";
 
-        private List<string> token = new List<string>();
+        protected const char ADD = '+';
+        protected const char SUBTRACTION = '-';
+
+        protected List<string> token = new List<string>();
 
         private string characters;
         private string lexema = "0123456789+-";
@@ -66,18 +69,18 @@ namespace ConsoleApplication1
             int counter = 0;
             for (int i = 0; i < s.Length; i++)
             {
-                if (s[i] == '+' || s[i] == '-')
+                if (s[i] == ADD || s[i] == SUBTRACTION)
                 { 
                     counter += 1;
                     if (counter == 1)
                     {
-                        if (s[i] == '+')
+                        if (s[i] == ADD)
                         {
                             temp[0] = PLUS;
                             temp[1] = s[i] + "#";
                             token.AddRange(temp);                           
                         }
-                        else if (s[i] == '-')
+                        else if (s[i] == SUBTRACTION)
                         {
                             temp[0] = MINUS;
                             temp[1] = s[i] + "#";
@@ -97,18 +100,20 @@ namespace ConsoleApplication1
                 for (int j = 0; j < s.Length; j++)
                 {
                     //проверка для однозначного числа
+                    //надо вместо символа использовать строки?
                     while (true)
                     {
-                        if(s[j] == '+')
+                        if(s[j] == ADD)
                         {
                             break;
                         }
-                        else if (s[j] == '-')
+                        else if (s[j] == SUBTRACTION)
                         {
                             break;
                         }
                         else
                         {
+                            //counter порядок числа, 1 - левое, 2 - правое
                             if (counter == 1)
                             {
                                 temp[0] = INTEGER;
@@ -139,52 +144,51 @@ namespace ConsoleApplication1
         }
     }
 
-    class Parser
-    {        
+    class Parser : LexicalAnalysis
+    {
         //опять для однозначных чисел
         public void compiler(List<string> l)
         {
             int a = 0;
             int b = 0;
-            string operation = "0";
+            char operation = '+';
             int counter = 0;
 
             for (int i = 0; i < l.Count; i++)
             {
-                if (i % 2 != 0)
+                if (i % 2 == 0)
                 {
-                    for (int j = 0; j < l.Count; j++)
+                    if (l[i] == "PLUS" || l[i] == "MINUS")
                     {
-                        if (l[j].EndsWith("#"))
+                        if (l[i] == "PLUS")
                         {
-                            break;
+                            operation = ADD;
                         }
                         else
                         {
-                            if (counter == 0)
-                            {
-                                operation = l[i].Substring(0,1);
-                                counter += 1;
-                            }
-                            else if (counter == 1)
-                            {
-                                a = Convert.ToInt32(l[i].Substring(0,1));
-                                counter += 1;
-                            }
-                            else if (counter == 2)
-                            {
-                                b = Convert.ToInt32(l[i].Substring(0,1));                           
-                            }
+                            operation = SUBTRACTION;
                         }
+                        counter += 1;
+                    }
+                    else if (l[i] == "INTEGER" && counter == 1)
+                    {
+                        i++;
+                        a = Convert.ToInt32(l[i].Substring(0, 1));
+                        counter += 1;
+                    }
+                    else if (l[i] == "INTEGER" && counter == 2)
+                    {
+                        i++;
+                        b = Convert.ToInt32(l[i].Substring(0, 1)); 
                     }
                 }
             }
-            if (operation == "+")
+            if (operation == ADD)
             {
                 int result = a + b;
                 Console.WriteLine(result);
             }
-            else if (operation == "-")
+            else if (operation == SUBTRACTION)
             {
                 int result = a - b;
                 Console.WriteLine(result);
@@ -198,14 +202,12 @@ namespace ConsoleApplication1
         {
             while (true)
             {
-                LexicalAnalysis lexema = new LexicalAnalysis();
-                Console.WriteLine("Enter your expression: " + lexema.Lexema);
-                lexema.Characters = Console.ReadLine();
-
-                List<string> token = new List<string>();
-                token = lexema.get_token(lexema.Characters);
-
                 Parser p = new Parser();
+                Console.WriteLine("Enter your expression: " + p.Lexema);
+                p.Characters = Console.ReadLine();
+                List<string> token = new List<string>();
+                token = p.get_token(p.Characters);
+
                 p.compiler(token);
 
                 //Console.ReadKey();
