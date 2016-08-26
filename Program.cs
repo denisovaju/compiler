@@ -111,7 +111,7 @@ namespace ConsoleApplication1
                 }
                 else
                 {
-                    break;
+                    continue;
                 }
             }
             if ((counter == 1 ^ c == 1))
@@ -141,9 +141,14 @@ namespace ConsoleApplication1
                     return token;
                 }
             }
-            else
+            else if(counter != 0)
             {
                 Console.WriteLine("Sorry, but you don't write '+' or '-' more one ");
+                return token;
+            }
+            else
+            {
+                Console.WriteLine("Write '+' or '-'");
                 return token;
             }
         }
@@ -197,24 +202,32 @@ namespace ConsoleApplication1
                     continue;
                 }
             }
-            foreach (string j in keys)
+            if (counter == 1)
             {
-                if (dic[j] == PLUS)
+                foreach (string j in keys)
                 {
-                    result = a + b;
-                    break;
+                    if (dic[j] == PLUS)
+                    {
+                        result = a + b;
+                        break;
+                    }
+                    else if (dic[j] == MINUS)
+                    {
+                        result = a - b;
+                        break;
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
-                else if (dic[j] == MINUS)
-                {
-                    result = a - b;
-                    break;
-                }
-                else
-                {
-                    continue;
-                }
-           }
-            return result;
+                return result;
+            }
+            else
+            {
+                Console.WriteLine("Don't consider expression");
+                return 404;
+            }
         }
     }
 
@@ -235,7 +248,7 @@ namespace ConsoleApplication1
 
                 Parser p = new Parser();
                 int x = p.number(tokena);
-                Console.WriteLine(x);
+                Console.WriteLine("Result: " + x);
                 //Console.ReadKey();
             }
         }
