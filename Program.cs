@@ -11,15 +11,15 @@ namespace ConsoleApplication1
         protected const string PLUS = "PLUS";
         protected const string MINUS = "MINUS";
 
-        protected const char ADD = '+';
-        protected const char SUBTRACTION = '-';
+        protected const string ADD = "+";
+        protected const string SUBTRACTION = "-";
 
         protected List<string> token = new List<string>();
 
         private string characters;
-        private string lexema = "0123456789+-";
+        private string lexema = "0123456789+-add";
 
-        public List<char> error = new List<char> ();       
+        public List<char> error = new List<char>();
 
         public string Lexema
         {
@@ -32,7 +32,7 @@ namespace ConsoleApplication1
             set
             {
                 foreach (char j in value)
-            {
+                {
                     for (int i = 0; i < Lexema.Length; i++)
                     {
                         if (j == Lexema[i])
@@ -45,153 +45,108 @@ namespace ConsoleApplication1
                             break;
                         }
                     }
-            }
-            if (error.Count == 0)
-            {
-                characters = value;
-               // Console.WriteLine("O-la-la");
-            }
-            else
-            {
-                characters = "0";
-                for (int i = 0; i < error.Count; i++ )
-                {
-                    Console.WriteLine("Error symbols: " + error[i]);
                 }
-                Console.WriteLine("Input Mistake!\n");
-            }
-            }
-        }    
-        //возвращает токены, только для однозначных чисел, порядок следования числа и оператора не учитывается
-        public List<string> get_token(string s)
-        {
-            string[] temp = new string[2];
-            int counter = 0;
-            for (int i = 0; i < s.Length; i++)
-            {
-                if (s[i] == ADD || s[i] == SUBTRACTION)
-                { 
-                    counter += 1;
-                    if (counter == 1)
+                if (error.Count == 0)
+                {
+                    characters = value;
+                    Console.WriteLine("O-la-la");
+                }
+                else
+                {
+                    characters = "0";
+                    for (int i = 0; i < error.Count; i++)
                     {
-                        if (s[i] == ADD)
-                        {
-                            temp[0] = PLUS;
-                            temp[1] = s[i] + "#";
-                            token.AddRange(temp);                           
-                        }
-                        else if (s[i] == SUBTRACTION)
-                        {
-                            temp[0] = MINUS;
-                            temp[1] = s[i] + "#";
-                            token.AddRange(temp);  
-                        }
-                        continue;
+                        Console.WriteLine("Error symbols: " + error[i]);
+                    }
+                    Console.WriteLine("Input Mistake!\n");
+                }
+            }
+        }
+
+        public Dictionary<string, string> tokena = new Dictionary<string, string>();
+
+        public string value1 = "0";
+        public string value2 = "0";
+        
+        public Dictionary<string, string> get_next_token(string s)
+        {
+            int counter = 0;
+            int index = 0;
+            int c = 0;
+
+            for (int i = 0; i < s.Length; i++ )
+            {
+                if (s.Contains(ADD) && counter != 1)
+                {
+                    index = s.IndexOf(ADD);
+                    string temp = s.Remove(0, index+1);
+                    if (temp.Contains(ADD))
+                    {
+                        break;
                     }
                     else
                     {
-                        Console.WriteLine("Mistake ++\n");
+                        counter = 1;
+                        continue;
+                    }
+                }
+                else if (s.Contains(SUBTRACTION) && c != 1)
+                {
+                    index = s.IndexOf(SUBTRACTION);
+
+                    string temp = s.Remove(0, index + 1);
+                    if (temp.Contains(SUBTRACTION))
+                    {
                         break;
                     }
-                }
-            }
-            if (counter == 1)
-            {
-                for (int j = 0; j < s.Length; j++)
-                {
-                    //проверка для однозначного числа
-                    //надо вместо символа использовать строки?
-                    while (true)
+                    else
                     {
-                        if(s[j] == ADD)
-                        {
-                            break;
-                        }
-                        else if (s[j] == SUBTRACTION)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            //counter порядок числа, 1 - левое, 2 - правое
-                            if (counter == 1)
-                            {
-                                temp[0] = INTEGER;
-                                temp[1] = s[j] + "#";
-                                token.AddRange(temp);
-                                counter += 1;
-                                break;
-                            }
-                            else if (counter == 2)
-                            {
-                                temp[0] = INTEGER;
-                                temp[1] = s[j] + "#";
-                                token.AddRange(temp);
-                                counter += 1;
-                                break;
-                            }
-                        }
+                        c = 1;
+                        continue;
                     }
                 }
-                return token;
+                else
+                {
+                    break;
+                }
             }
+            if ((counter == 1 ^ c == 1))
+            {
+                if (((!s.StartsWith(ADD)) && (!s.EndsWith(ADD))) && ((!s.StartsWith(SUBTRACTION)) && (!s.EndsWith(SUBTRACTION))))
+                {
+                    Console.WriteLine("True");
+                    value1 = s.Substring(0, index);
+
+                    //Console.WriteLine(value);
+                    tokena.Add(value1, INTEGER);
+
+                    //index++;
+                    value2 = s.Remove(0, index + 1); ;
+                    tokena.Add(value2, INTEGER);
+                    //ICollection<string> keys = tokena.Keys;
+                    return tokena;
+                }
+                else
+                {
+                    Console.WriteLine("Sorry, but you don't write '+' or '-' at the start or end");
+                    return tokena;
+                }
+            }
+
             else
             {
-                token.Clear();
-                token.Add("No correct input");
-                return token;
+                Console.WriteLine("Sorry, but you don't write '+' or '-' more one ");
+                return tokena;
             }
         }
-    }
 
-    class Parser : LexicalAnalysis
-    {
-        //опять для однозначных чисел
-        public void compiler(List<string> l)
+        public void show(Dictionary<string, string> dic)
         {
-            int a = 0;
-            int b = 0;
-            char operation = '+';
-            int counter = 0;
-
-            for (int i = 0; i < l.Count; i++)
+            ICollection<string> keys = dic.Keys;
+            foreach (string j in keys)
             {
-                if (i % 2 == 0)
-                {
-                    if (l[i] == "PLUS" || l[i] == "MINUS")
-                    {
-                        if (l[i] == "PLUS")
-                        {
-                            operation = ADD;
-                        }
-                        else
-                        {
-                            operation = SUBTRACTION;
-                        }
-                        counter += 1;
-                    }
-                    else if (l[i] == "INTEGER" && counter == 1)
-                    {
-                        i++;
-                        a = Convert.ToInt32(l[i].Substring(0, 1));
-                        counter += 1;
-                    }
-                    else if (l[i] == "INTEGER" && counter == 2)
-                    {
-                        i++;
-                        b = Convert.ToInt32(l[i].Substring(0, 1)); 
-                    }
-                }
-            }
-            if (operation == ADD)
-            {
-                int result = a + b;
-                Console.WriteLine(result);
-            }
-            else if (operation == SUBTRACTION)
-            {
-                int result = a - b;
-                Console.WriteLine(result);
+                Console.WriteLine(j);
+                Console.WriteLine(dic[j]);
             }
         }
     }
@@ -202,13 +157,14 @@ namespace ConsoleApplication1
         {
             while (true)
             {
-                Parser p = new Parser();
+                LexicalAnalysis p = new LexicalAnalysis();
                 Console.WriteLine("Enter your expression: " + p.Lexema);
                 p.Characters = Console.ReadLine();
-                List<string> token = new List<string>();
-                token = p.get_token(p.Characters);
 
-                p.compiler(token);
+                Dictionary<string, string> tokena = new Dictionary<string, string>();
+
+                tokena = p.get_next_token(p.Characters);
+                p.show(tokena);
 
                 //Console.ReadKey();
             }
