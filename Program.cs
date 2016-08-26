@@ -11,6 +11,8 @@ namespace ConsoleApplication1
         public const string PLUS = "PLUS";
         public const string MINUS = "MINUS";
 
+        private List<string> token = new List<string>();
+
         private string characters;
         private string lexema = "0123456789+-";
 
@@ -56,13 +58,7 @@ namespace ConsoleApplication1
                 Console.WriteLine("Input Mistake!\n");
             }
             }
-        }
-    }
-
-    class ArithmeticAnalysis : LexicalAnalysis
-    {
-        private List<string> token = new List<string>();
-
+        }    
         //возвращает токены, только для однозначных чисел, порядок следования числа и оператора не учитывается
         public List<string> get_token(string s)
         {
@@ -206,9 +202,8 @@ namespace ConsoleApplication1
                 Console.WriteLine("Enter your expression: " + lexema.Lexema);
                 lexema.Characters = Console.ReadLine();
 
-                ArithmeticAnalysis number = new ArithmeticAnalysis();
                 List<string> token = new List<string>();
-                token = number.get_token(lexema.Characters);
+                token = lexema.get_token(lexema.Characters);
 
                 Parser p = new Parser();
                 p.compiler(token);
